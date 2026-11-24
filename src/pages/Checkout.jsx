@@ -5,9 +5,18 @@ import { Elements, PaymentElement, ExpressCheckoutElement, useElements, useStrip
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Lock, LoaderCircle, ShieldCheck, Tag } from 'lucide-react';
-import { PACKAGES, EXTERIOR, PREPAY_CODE, PREPAY_DISCOUNT } from '../data/site';
+import { PREPAY_CODE, PREPAY_DISCOUNT } from '../data/site';
 import { fromDateKey } from '../utils/time';
-import { API_URL, apiConfigured, clearPending, createBooking, getBookedTimes, loadPending } from '../utils/bookingDb';
+import {
+  apiConfigured,
+  clearPending,
+  createBooking,
+  createPaymentIntent,
+  getBookedTimes,
+  loadPending,
+  savePending,
+  serviceLabel,
+} from '../utils/bookingDb';
 
 const PK = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '').trim();
 const stripeReady = PK.startsWith('pk_') && apiConfigured;
@@ -23,30 +32,6 @@ const appearance = {
     borderRadius: '10px',
   },
 };
-
-function serviceLabel(pending) {
-  const pkg = PACKAGES.find((p) => p.id === pending.packageId);
-  return `${pkg?.name || 'Detail'}${pending.exterior ? ` + ${EXTERIOR.name}` : ''}`;
-}
-
-function buildBooking(pending, { paymentStatus, total, discount }) {
-  const { info } = pending;
-  const lines = [`Total: $${total}`];
-  if (discount) lines.push(`${PREPAY_CODE} -$${discount}`);
-  lines.push(paymentStatus === 'Paid' ? 'Paid online (Stripe)' : 'Pay on service day');
-  return {
-    date: pending.date,
-    time: pending.time,
-    service: serviceLabel(pending),
-    name: info.name,
-    phone: info.phone,
-    email: info.email,
-    vehicle: info.vehicle,
-    address: info.address,
-    notes: lines.join(' · '),
-    payment_status: paymentStatus,
-  };
-}
 
 /* ─── Stripe form (inside <Elements>) ─── */
 function PayForm({ clientSecret, total, onPaid, disabled }) {
@@ -146,26 +131,20 @@ export default function Checkout() {
     let alive = true;
     setClientSecret('');
     setIntentError('');
-    fetch(`${API_URL}/api/create-payment-intent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: total * 100,
-        description: `Bonnie Car Detailing — ${serviceLabel(pending)} on ${pending.date} ${pending.time}`,
-        email: pending.info.email,
-      }),
-    })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
-      .then(({ ok, d }) => {
+    // The Worker prices the payment from the selected services and coupon.
+    createPaymentIntent(pending, applied ? PREPAY_CODE : '')
+      .then((d) => {
         if (!alive) return;
-        if (!ok || !d.clientSecret) throw new Error(d.error || 'Could not start payment.');
+        if (!d.clientSecret) throw new Error('Could not start payment.');
         setClientSecret(d.clientSecret);
+        // Kept so a redirect-based payment method can finish the booking on /confirmation.
+        savePending({ ...pending, paymentIntentId: d.paymentIntentId });
       })
       .catch((err) => alive && setIntentError(err.message || 'Could not start payment.'));
     return () => {
       alive = false;
     };
-  }, [pending, total]);
+  }, [pending, applied]);
 
   if (!pending) return null;
 
@@ -179,17 +158,20 @@ export default function Checkout() {
     }
   }
 
-  async function finalize(paymentStatus, paidTotal, paidDiscount) {
+  // Pay later: { payLater: true }. Card: the PaymentIntent id, which the Worker checks with Stripe.
+  async function finalize(paymentIntentId) {
     setSaving(true);
     try {
       const { booking } = await createBooking(
-        buildBooking(pending, { paymentStatus, total: paidTotal, discount: paidDiscount })
+        pending,
+        paymentIntentId ? { paymentIntentId } : { payLater: true }
       );
       clearPending();
       navigate('/confirmation', { state: { booking } });
     } catch (err) {
       if (err.code === 'SLOT_TAKEN') {
-        toast.error('Sorry — that time was just booked. Please choose another slot.');
+        // The Worker's message says whether a card payment was refunded.
+        toast.error(err.message || 'Sorry — that time was just booked. Please choose another slot.', { duration: 8000 });
         navigate('/book');
       } else {
         toast.error(err.message || 'Something went wrong saving your booking. Please call us.');
@@ -207,7 +189,7 @@ export default function Checkout() {
       navigate('/book');
       return;
     }
-    finalize('Pay Later', subtotal, 0);
+    finalize();
   }
 
   const dateLabel = format(fromDateKey(pending.date), 'EEE, MMM d, yyyy');
@@ -302,7 +284,7 @@ export default function Checkout() {
                 clientSecret={clientSecret}
                 total={total}
                 disabled={saving}
-                onPaid={() => finalize('Paid', total, discount)}
+                onPaid={(paymentIntentId) => finalize(paymentIntentId)}
               />
             </Elements>
           ) : (

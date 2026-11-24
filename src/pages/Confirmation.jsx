@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Check, CalendarPlus, Phone, House, LoaderCircle } from 'lucide-react';
-import { BUSINESS, EXTERIOR, PACKAGES, TIMEZONE } from '../data/site';
+import { BUSINESS, TIMEZONE } from '../data/site';
 import { fromDateKey } from '../utils/time';
 import { clearPending, createBooking, loadLastBooking, loadPending } from '../utils/bookingDb';
 
@@ -57,15 +57,8 @@ export default function Confirmation() {
     ran.current = true;
     if (redirectStatus === 'succeeded' && pending) {
       setFinishing(true);
-      const pkg = PACKAGES.find((p) => p.id === pending.packageId);
-      createBooking({
-        date: pending.date,
-        time: pending.time,
-        service: `${pkg?.name || 'Detail'}${pending.exterior ? ` + ${EXTERIOR.name}` : ''}`,
-        ...pending.info,
-        notes: 'Paid online (Stripe redirect)',
-        payment_status: 'Paid',
-      })
+      const paymentIntentId = params.get('payment_intent') || pending.paymentIntentId;
+      createBooking(pending, { paymentIntentId })
         .then(({ booking: b }) => {
           clearPending();
           setBooking(b);
@@ -123,6 +116,7 @@ export default function Confirmation() {
     ['Vehicle', booking.vehicle],
     ['Address', booking.address],
     ['Payment', booking.payment_status === 'Paid' ? 'Paid online' : 'Pay on service day'],
+    ...(booking.total != null ? [[booking.payment_status === 'Paid' ? 'Paid' : 'Due on service day', '$' + booking.total]] : []),
   ];
 
   return (

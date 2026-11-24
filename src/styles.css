@@ -570,19 +570,19 @@ p {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.hero h1 {
+.hero .hero-title {
   margin-top: 22px;
   font-size: clamp(2.7rem, 6.4vw, 5.4rem);
   text-transform: uppercase;
   line-height: 0.98;
 }
-.hero h1 .chrome {
+.hero .hero-title .chrome {
   background: var(--grad-chrome);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.hero h1 .shine {
+.hero .hero-title .shine {
   display: inline-block;
   font-family: var(--font-slant);
   font-style: italic;
@@ -2582,7 +2582,7 @@ p {
     padding-top: calc(var(--nav-h) + 40px);
     padding-bottom: 110px;
   }
-  .hero h1 {
+  .hero .hero-title {
     font-size: clamp(2.3rem, 11vw, 3rem);
   }
   .hero-sub {

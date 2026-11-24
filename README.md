@@ -1,55 +1,81 @@
-# Bonnie Car Detailing — Buena Park
+# Bonnie Car Detailing Buena Park
 
-Mobile car detailing booking site · Vite + React 18 · Cloudflare Pages + Worker + D1 · Stripe.
+Mobile car detailing site for Bonnie Car Detailing (Buena Park, CA), live at
+https://bonniecardetailingbuenapark.site (no www; www redirects to it).
+Vite + React 18, React Router, Stripe (Payment Element + Express Checkout), Cloudflare Pages,
+and a Cloudflare Worker that stores bookings in the shared D1 database on the Remoticojobs account.
 
-| | |
-|---|---|
-| Phone | (657) 701-3431 |
-| Location | Buena Park, CA |
-| Source tag | `bonnie` |
-| Booking ID prefix | `BON-` |
-| Worker | `bonnie-detailing-worker` |
-| D1 | shared `detailing-bookings` (binding `DB`) |
-| Pages project | `bonnie-car-detailing` |
+- Booking IDs start with `BON-`, bookings are stored with `source = 'bonnie-buena-park'`.
+- Services: Basic Detail $150 (about 2–3 hours), Premium Detail $200 (about 4–6 hours),
+  Exterior Wash +$50 (add-on only, the Worker rejects it on its own). Same price for any vehicle.
+  Eco-friendly products (confirmed by the owner).
+  Coupon `PREPAY` = $15 off when paying online.
+- Slots: start times 8:00 AM to 5:00 PM, every 30 minutes, 7 days a week, Pacific time,
+  4-hour lead time; the calendar shows 60 days ahead (the Worker allows 90). Keep `src/data/site.js` + `src/utils/time.js` and `worker/worker.js` in sync.
 
-## Design (unique to this site)
+## Build
 
-- **Palette from the logo:** midnight navy `#06142E`, splash blue `#13A8F2`, royal `#0A4FA8`, sunset gold `#F7C520` → amber `#F29A0A`, chrome `#E9EEF4`.
-- **Fonts:** Russo One (display) · Sora (body) · Kanit italic (prices, eyebrows).
-- **Nav:** logo "badge" hanging off a transparent bar, pill-shaped link group; mobile menu is a **bottom sheet** with a Call Now / Book Online action bar.
-- **Hero:** split layout with hexagon-clipped photo (matches the logo shield), floating price badges, rising soap bubbles, tilted gold marquee ribbon.
-- **Section order:** Hero → Detail Menu (2 packages + dashed add-on bar) → How It Works (3 hexagon "laps" on a dashed road) → Gallery (bento grid / swipe carousel + lightbox) → Why Bonnie (sticky photo + spinning hex stamp) → Service Area (map card) → FAQ → CTA band → Footer (4 columns + outlined BONNIE wordmark).
-- Skewed buttons echo the italic logo wordmark.
+```bash
+npm install
+npm run build   # vite build + SSR build + scripts/prerender.js
+```
+
+`scripts/prerender.js` writes one static HTML file per route (`dist/<slug>.html`) with its own
+title, description, canonical, Open Graph tags and JSON-LD, writes `dist/sitemap.xml`, and fails the
+build if a title is over 60 or a description over 160 characters. Booking, checkout and
+confirmation ship head tags only (they render in the browser). There is no `_redirects` file:
+Cloudflare Pages serves `dist/404.html` for unknown URLs, and `public/_headers` keeps
+`*.pages.dev` out of search results.
+
+## Where things live
+
+- Business facts, prices, hours, home FAQ, reviews, Google profile link: `src/data/site.js`
+  (confirmed facts are listed at the top)
+- Head tags and schema: `src/lib/seo.js`
+- Service and city landing pages (data): `src/lib/pages.js`, rendered by `src/pages/Landing.jsx`
+- Sections shared by home and landing pages: `src/components/Sections.jsx`
+- Reviews: `REVIEWS` in `src/data/site.js` (real Google reviews only; the section and its menu
+  link stay hidden while the list is empty)
+- Photos: `public/images/`, share image `public/images/og.jpg`
 
 ## Booking flow
 
-Package → Exterior Wash add-on (Yes / No) → Date → Time → Your Details → Checkout → Confirmation
+1. `/book` saves the choices in sessionStorage; `/checkout` shows the total.
+2. Card / Apple Pay / Google Pay / Link: `/checkout` calls `POST /api/create-payment-intent` on load
+   (the Worker prices it), the browser confirms with Stripe, then `POST /api/bookings` with the
+   `paymentIntentId` (`/confirmation` does this for redirect-based methods). The Worker re-reads the PaymentIntent from Stripe and checks status, site,
+   amount, services, date and time before saving it as Paid. If the slot was taken meanwhile, it
+   refunds the payment automatically.
+3. "I'll pay later": `/checkout` calls `POST /api/bookings` with `payLater: true`.
+4. Each new booking sends one `booking_confirmed` event to the GHL webhook
+   (`booking_notifications` makes sure it is sent only once). Pricing and the PaymentIntent are
+   stored in `booking_payments`, like the other Remoticojobs sites.
 
-- 30-min slots 8:00 AM – 4:30 PM, Mon–Sun, California time; past slots disabled.
-- Back / Continue become a **sticky bottom action bar** on mobile (with running total).
-- Checkout: back link + "Secure checkout" → `$15 OFF` prepay banner (code `PREPAY`) → summary → coupon → Stripe (Express Checkout + Payment Element) → "I'll pay later" link.
-- `payment_status` is saved as `Paid` or `Pay Later`.
-- Without a Stripe key / Worker URL the checkout runs in **demo mode** (booking reserved, no charge).
+## Worker
 
-## Edit content
+`worker/worker.js`, config in `worker/wrangler.jsonc` (account Remoticojobs, D1
+`detailing-bookings-remoticojobs`, shared with Alera, Apex, Aventa, Aurum and Blacktop; every query is
+scoped by `source`). The Worker never creates or alters tables. Deploy from `worker/`:
 
-Everything business-specific lives in `src/data/site.js` (phone, hours, services, service-area chips, gallery). Photos are in `public/images/` — replace files with the same names to swap them.
-
-## Local dev (Windows CMD)
-
+```bash
+npx wrangler deploy
 ```
-npm install
-npm run dev
+
+Secrets (dashboard → Workers → bonnie-car-detailing-v2 → Settings → Variables and Secrets):
+
+| Name | Required | What |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | yes | Same Stripe account as `VITE_STRIPE_PUBLISHABLE_KEY` |
+| `GHL_WEBHOOK_URL` | yes | GoHighLevel inbound webhook for the booking email |
+| `ADMIN_TOKEN` | no | `Authorization: Bearer <token>` for `GET/PATCH /api/bookings` (closed without it) |
+
+## Site deploy
+
+Cloudflare Pages project `bonnie-car-detailing-v2` on Remoticojobs (direct upload, no Git connection):
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name bonnie-car-detailing-v2 --branch main
 ```
 
-## Go-live checklist
-
-1. **Worker** (Cloudflare dashboard → Workers & Pages → `bonnie-detailing-worker`): paste `worker/worker.js`, deploy.
-2. **D1 binding:** Worker → Settings → Bindings → D1 → variable `DB` → `detailing-bookings`.
-3. **Secret:** Worker → Settings → Variables and Secrets → `STRIPE_SECRET_KEY` (type Secret). Optional: `ADMIN_TOKEN`.
-4. **`.env.local`:** set `VITE_STRIPE_PUBLISHABLE_KEY=pk_...` and `VITE_API_URL=https://bonnie-detailing-worker.<subdomain>.workers.dev` then commit.
-5. **GitHub secrets:** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
-6. Push to `main` → GitHub Actions builds and deploys to Pages.
-7. **Apple Pay:** add the live domain in Stripe → Settings → Payment method domains.
-
-Test: `https://<worker-url>/api/health` should return `{"ok":true,"stripe":true,"db":true}`.
+`.env.local` holds only public values (Stripe publishable key, Worker URL) and is committed on purpose.

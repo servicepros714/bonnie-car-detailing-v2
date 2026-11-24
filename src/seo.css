@@ -1,0 +1,305 @@
+/* SEO additions: keyword H1 in the hero, link chips, reviews, landing pages, 404, wider footer. */
+
+/* Home hero: the small "Mobile car detailing in Buena Park, CA" pill is the H1. */
+h1.hero-kicker {
+  font-family: var(--font-body);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+.hero .hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+/* ---------- Link chips ---------- */
+.link-chips {
+  margin: 18px 0 0;
+}
+a.chip {
+  color: var(--chrome);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+a.chip:hover {
+  border-color: var(--gold);
+  color: #fff;
+  background: rgba(247, 197, 32, 0.12);
+}
+a.chip.home:hover {
+  color: #140f00;
+  background: var(--grad-gold);
+}
+.chip svg {
+  color: var(--aqua);
+}
+.chip.home svg {
+  color: #140f00;
+}
+.area-copy .link-chips {
+  margin: 22px 0 30px;
+}
+.area-copy .section-lead a,
+.lp-intro a {
+  color: var(--gold);
+}
+
+.pkg-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 36px;
+}
+.pkg-links > span {
+  font-family: var(--font-slant);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--steel);
+}
+.pkg-links .link-chips {
+  margin: 0;
+  justify-content: center;
+}
+
+/* ---------- Reviews ---------- */
+.reviews {
+  background: var(--night);
+}
+.rev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+.rev {
+  position: relative;
+  margin: 0;
+  padding: 26px 24px 22px;
+  border-radius: 18px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+}
+.rev-q {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: var(--line-strong);
+}
+.rev-stars {
+  display: flex;
+  gap: 3px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.rev blockquote {
+  margin: 0;
+  color: var(--chrome);
+  line-height: 1.65;
+}
+.rev figcaption {
+  margin-top: 14px;
+  font-weight: 600;
+  color: var(--steel);
+  font-size: 0.88rem;
+}
+
+/* ---------- Landing pages ---------- */
+.lp-hero {
+  position: relative;
+  padding: calc(var(--nav-h) + 64px) 0 80px;
+  background:
+    radial-gradient(ellipse at 85% 0%, rgba(19, 168, 242, 0.22), transparent 55%),
+    radial-gradient(ellipse at 10% 100%, rgba(247, 197, 32, 0.1), transparent 50%),
+    var(--night);
+}
+.lp-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 56px;
+  align-items: center;
+}
+.lp-crumbs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.lp-crumbs a {
+  color: var(--steel);
+}
+.lp-crumbs a:hover {
+  color: var(--gold);
+}
+.lp-title {
+  margin-top: 16px;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.lp-title .chrome {
+  background: var(--grad-chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lp-title .lp-city {
+  display: block;
+  font-family: var(--font-slant);
+  font-style: italic;
+  font-weight: 800;
+  text-transform: none;
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.08em;
+}
+
+.lp-card {
+  padding: 30px 28px;
+  border-radius: 22px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, rgba(11, 35, 80, 0.85), rgba(6, 20, 46, 0.95));
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+}
+.lp-card-flag {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--grad-gold);
+  color: #140f00;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lp-card-name {
+  font-size: 1.5rem;
+}
+.lp-card-price {
+  margin: 10px 0 18px;
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  color: var(--gold);
+  line-height: 1;
+}
+.lp-card-price small {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--steel);
+}
+.lp-card .pkg-list {
+  margin-bottom: 22px;
+}
+.lp-card-note {
+  margin-top: 14px;
+  font-size: 0.84rem;
+  text-align: center;
+  color: var(--steel);
+}
+
+.lp-intro {
+  background: var(--ink);
+}
+.lp-intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 56px;
+  align-items: center;
+}
+.lp-p {
+  margin-top: 16px;
+  color: var(--steel);
+  line-height: 1.75;
+  font-size: 1.02rem;
+}
+.lp-photo {
+  margin: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+}
+.lp-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lp-points {
+  background: #051430;
+}
+.lp-points-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.lp-point {
+  padding: 26px 24px;
+  border-radius: 18px;
+  border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--gold);
+  background: var(--card);
+}
+.lp-point h3 {
+  font-size: 1.15rem;
+  margin-bottom: 8px;
+}
+.lp-point p {
+  color: var(--steel);
+}
+
+.lp-related {
+  background: var(--ink);
+  padding-top: 0;
+}
+.lp-related-title {
+  font-size: 1.2rem;
+  margin-top: 24px;
+}
+.lp-related .link-chips {
+  margin-bottom: 20px;
+}
+
+/* ---------- 404 ---------- */
+.nf {
+  min-height: 70vh;
+  padding-top: calc(var(--nav-h) + 80px);
+  background: var(--night);
+}
+.nf .section-lead {
+  margin-top: 12px;
+}
+.nf .btn {
+  margin-top: 26px;
+}
+
+/* ---------- Footer: five columns ---------- */
+.footer-grid {
+  grid-template-columns: 1.3fr 1fr 0.9fr 0.9fr 1fr;
+}
+
+@media (max-width: 1024px) {
+  .lp-grid,
+  .lp-intro-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .lp-photo {
+    max-height: 460px;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .lp-hero {
+    padding-top: calc(var(--nav-h) + 36px);
+  }
+  .lp-points-grid {
+    grid-template-columns: 1fr;
+  }
+}

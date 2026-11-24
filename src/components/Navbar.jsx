@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, CalendarCheck, ChevronRight, Clock, MapPin } from 'lucide-react';
-import { BUSINESS } from '../data/site';
+import { BUSINESS, REVIEWS } from '../data/site';
 
 const LINKS = [
-  { to: '/#packages', label: 'Packages', num: '01' },
-  { to: '/#process', label: 'How It Works', num: '02' },
-  { to: '/#gallery', label: 'Gallery', num: '03' },
-  { to: '/#area', label: 'Service Area', num: '04' },
-  { to: '/#faq', label: 'FAQ', num: '05' },
-];
+  { to: '/#packages', label: 'Packages' },
+  { to: '/#process', label: 'How It Works' },
+  { to: '/#gallery', label: 'Gallery' },
+  { to: '/#area', label: 'Service Area' },
+  ...(REVIEWS.length ? [{ to: '/#reviews', label: 'Reviews' }] : []),
+  { to: '/#faq', label: 'FAQ' },
+].map((l, i) => ({ ...l, num: String(i + 1).padStart(2, '0') }));
 
 export default function Navbar({ solid = false }) {
   const [scrolled, setScrolled] = useState(false);

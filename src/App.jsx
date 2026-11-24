@@ -8,6 +8,10 @@ import Home from './pages/Home';
 import Book from './pages/Book';
 import Checkout from './pages/Checkout';
 import Confirmation from './pages/Confirmation';
+import Landing from './pages/Landing';
+import NotFound from './pages/NotFound';
+import Seo from './components/Seo';
+import { LANDING_PAGES } from './lib/pages';
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -33,14 +37,18 @@ export default function App() {
   return (
     <>
       <ScrollManager />
+      <Seo />
       <Navbar solid={inFlow} />
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          {LANDING_PAGES.map((page) => (
+            <Route key={page.path} path={page.path} element={<Landing page={page} />} />
+          ))}
           <Route path="/book" element={<Book />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/confirmation" element={<Confirmation />} />
-          <Route path="*" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       {!inFlow && <Footer />}

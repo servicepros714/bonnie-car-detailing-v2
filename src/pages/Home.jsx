@@ -3,24 +3,20 @@ import { Link } from 'react-router-dom';
 import {
   Phone,
   CalendarCheck,
-  Check,
-  Plus,
-  ArrowRight,
   Truck,
   ShieldCheck,
   Droplets,
   Sparkles,
   CreditCard,
   Clock,
-  MapPin,
   X,
   ChevronLeft,
   ChevronRight,
-  Star,
   Hand,
 } from 'lucide-react';
 import useReveal from '../components/useReveal';
-import { BUSINESS, PACKAGES, EXTERIOR, SERVICE_AREAS, GALLERY, PREPAY_DISCOUNT } from '../data/site';
+import { BUSINESS, HOME_AREAS, GALLERY, PREPAY_DISCOUNT } from '../data/site';
+import { Packages, Reviews, Faq, Cta, AreaChips } from '../components/Sections';
 
 /* ─── Hero ───────────────────────────────────────────── */
 function Bubbles() {
@@ -59,7 +55,7 @@ function Hero() {
     'Mobile Detailing',
     'Buena Park, CA',
     'We Come To You',
-    'Open 7 Days',
+    'Every Day 8 AM – 5 PM',
     'Interior Deep Cleans',
     'Hand Wash Add-On',
   ];
@@ -69,17 +65,17 @@ function Hero() {
       <Bubbles />
       <div className="container hero-inner">
         <div>
-          <span className="hero-kicker reveal">
-            <b>Mobile</b> Car detailing · {BUSINESS.city}, {BUSINESS.region}
-          </span>
-          <h1 className="reveal" style={{ '--d': '80ms' }}>
+          <h1 className="hero-kicker reveal">
+            <b>Mobile</b> Car detailing in {BUSINESS.city}, {BUSINESS.region}
+          </h1>
+          <p className="hero-title reveal" style={{ '--d': '80ms' }}>
             <span className="chrome">We bring the</span> <span className="shine">shine</span>
             <br />
             <span className="chrome">to your driveway.</span>
-          </h1>
+          </p>
           <p className="hero-sub reveal" style={{ '--d': '160ms' }}>
-            Deep interior details and hand-washed exteriors, done right where your car is parked. Pick a
-            package, pick a time — we handle the rest.
+            Deep interior details and an optional hand-washed exterior, done right where your car is parked,
+            with our own water and power. Pick a package, pick a time and we handle the rest.
           </p>
           <div className="hero-ctas reveal" style={{ '--d': '240ms' }}>
             <Link to="/book" className="btn btn-gold">
@@ -98,7 +94,10 @@ function Hero() {
               <Truck size={16} /> Fully mobile
             </span>
             <span>
-              <Clock size={16} /> Open 7 days
+              <Droplets size={16} /> Own water &amp; power
+            </span>
+            <span>
+              <Clock size={16} /> Every day 8–5
             </span>
             <span>
               <CreditCard size={16} /> Pay online or later
@@ -147,93 +146,6 @@ function Hero() {
   );
 }
 
-/* ─── Packages ───────────────────────────────────────── */
-function Packages() {
-  return (
-    <section className="section packages" id="packages">
-      <div className="container">
-        <div className="section-head">
-          <div className="reveal">
-            <span className="eyebrow">The Detail Menu</span>
-            <h2 className="section-title">
-              Pick your <span className="gold">package</span>
-            </h2>
-          </div>
-          <p className="section-lead reveal" style={{ '--d': '100ms' }}>
-            Two interior packages, one simple add-on. Flat pricing, no surprises — every detail is done by hand
-            at your location.
-          </p>
-        </div>
-
-        <div className="pkg-grid">
-          {PACKAGES.map((p, i) => (
-            <article
-              key={p.id}
-              className={`pkg reveal ${p.featured ? 'pkg-featured' : ''}`}
-              style={{ '--d': `${i * 120}ms` }}
-            >
-              <span className="pkg-ghost" aria-hidden="true">
-                0{i + 1}
-              </span>
-              {p.featured && <span className="pkg-flag">Most complete</span>}
-              <div className="pkg-top">
-                <div>
-                  <h3 className="pkg-name">{p.name}</h3>
-                  <p className="pkg-tag">{p.tagline}</p>
-                </div>
-              </div>
-              <div className="pkg-price">
-                <sup>$</sup>
-                <b>{p.price}</b>
-                <small>Interior</small>
-              </div>
-              <ul className="pkg-list">
-                {p.items.map((it) => (
-                  <li key={it}>
-                    <span className="tick">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    {it}
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-
-        <div className="addon reveal">
-          <div className="addon-price hex">
-            <div>
-              <small>Add-on</small>
-              <b>+${EXTERIOR.price}</b>
-            </div>
-          </div>
-          <div>
-            <h3>{EXTERIOR.name}</h3>
-            <p>Add it to either package during booking for a full inside-and-out finish.</p>
-            <ul>
-              {EXTERIOR.items.map((it) => (
-                <li key={it}>
-                  <Plus size={14} strokeWidth={3} />
-                  {it}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="pkg-cta reveal">
-          <Link to="/book" className="btn btn-gold">
-            <span>
-              Book Now <ArrowRight size={17} />
-            </span>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Process ────────────────────────────────────────── */
 function Process() {
   const laps = [
@@ -243,11 +155,11 @@ function Process() {
     },
     {
       title: 'Lock in a time',
-      text: 'Grab any open 30-minute slot, 7:00 AM to 7:00 PM, seven days a week.',
+      text: 'Grab any open start time between 8:00 AM and 5:00 PM, seven days a week.',
     },
     {
       title: 'We pull up & detail',
-      text: `We come to your spot in ${BUSINESS.city}. You carry on with your day — we hand back a fresh car.`,
+      text: `We come to your spot in ${BUSINESS.city} with our own water and power. You carry on with your day — we hand back a fresh car.`,
     },
   ];
   return (
@@ -372,13 +284,13 @@ function Why() {
     },
     {
       icon: ShieldCheck,
-      title: 'Protection built in',
-      text: 'Premium finishes with a UV-protectant coating to help keep dash and trim from fading in the SoCal sun.',
+      title: 'Satisfaction guarantee',
+      text: 'Every detail is backed by our satisfaction guarantee. If something is not right, we make it right.',
     },
     {
-      icon: CreditCard,
-      title: 'Book & pay your way',
-      text: `Reserve online in a few taps. Prepay to save $${PREPAY_DISCOUNT}, or choose to pay later.`,
+      icon: Droplets,
+      title: 'Eco-friendly products',
+      text: 'We use eco-friendly detailing products, and the same price applies to every car, SUV, truck or minivan.',
     },
   ];
   return (
@@ -429,8 +341,8 @@ function Why() {
               <small>Days open</small>
             </div>
             <div className="stat">
-              <b>7AM–7PM</b>
-              <small>Booking hours</small>
+              <b>8AM–5PM</b>
+              <small>Start times</small>
             </div>
             <div className="stat">
               <b>${PREPAY_DISCOUNT}</b>
@@ -456,16 +368,10 @@ function Area() {
               Rolling through <span className="gold">{BUSINESS.city}</span>
             </h2>
             <p className="section-lead">
-              Based in {BUSINESS.city} and detailing across the neighborhoods around it. Not sure if we reach
-              you? Give us a call.
+              Based in {BUSINESS.city} and detailing all over town, from {HOME_AREAS.slice(0, 3).join(', ')} to{' '}
+              {HOME_AREAS[3]}, plus these nearby cities at the same prices:
             </p>
-            <div className="chips">
-              {SERVICE_AREAS.map((a, i) => (
-                <span key={a} className={`chip ${i === 0 ? 'home' : ''}`}>
-                  <MapPin size={13} /> {a}
-                </span>
-              ))}
-            </div>
+            <AreaChips />
             <div className="area-info">
               <div>
                 <Clock size={18} /> {BUSINESS.hours}
@@ -484,100 +390,6 @@ function Area() {
   );
 }
 
-/* ─── FAQ ────────────────────────────────────────────── */
-const FAQS = [
-  {
-    q: 'Do you really come to me?',
-    a: `Yes — Bonnie Car Detailing is fully mobile. Book a time and we meet your car where it's parked in and around ${BUSINESS.city}.`,
-  },
-  {
-    q: "What's the difference between Basic and Premium?",
-    a: 'Basic Detail ($150) is a thorough interior refresh: triple-stage vacuuming, a full surface wipe-down and floor mat cleaning. Premium Detail ($200) goes deeper with carpet extraction, full interior shampooing, interior glass and a UV-protectant coating.',
-  },
-  {
-    q: 'Can I get the outside washed too?',
-    a: `Absolutely. Add the Exterior Wash for +$${EXTERIOR.price} during booking — hand wash, rims, tire scrub and shine, door jambs and a spot-free hand dry.`,
-  },
-  {
-    q: 'How does payment work?',
-    a: `Prepay securely online with card, Apple Pay or Google Pay and save $${PREPAY_DISCOUNT} with code PREPAY, or choose "I'll pay later" at checkout and pay on the day.`,
-  },
-  {
-    q: 'What hours can I book?',
-    a: 'Appointments run in 30-minute slots from 7:00 AM to 7:00 PM, Monday through Sunday. Online bookings open 4 hours from now — for anything sooner, give us a call.',
-  },
-];
-
-function Faq() {
-  const [open, setOpen] = useState(0);
-  return (
-    <section className="section faq" id="faq">
-      <div className="container faq-grid">
-        <div className="reveal">
-          <span className="eyebrow">Questions</span>
-          <h2 className="section-title">
-            Good to <span className="gold">know</span>
-          </h2>
-          <p className="section-lead">Anything else on your mind? We&apos;re a quick call away.</p>
-          <a href={BUSINESS.phoneHref} className="btn btn-outline" style={{ marginTop: 26 }}>
-            <span>
-              <Phone size={17} /> {BUSINESS.phoneDisplay}
-            </span>
-          </a>
-        </div>
-        <div className="faq-list">
-          {FAQS.map((f, i) => (
-            <div key={f.q} className={`faq-item reveal ${open === i ? 'open' : ''}`} style={{ '--d': `${i * 70}ms` }}>
-              <button className="faq-q" onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
-                {f.q}
-                <span className="pm">
-                  <Plus size={18} />
-                </span>
-              </button>
-              <div className="faq-a">
-                <div>
-                  <p>{f.a}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── CTA band ───────────────────────────────────────── */
-function Cta() {
-  return (
-    <section className="cta">
-      <div className="container">
-        <div className="cta-band reveal">
-          <div>
-            <span className="eyebrow">
-              <Star size={14} /> Ready when you are
-            </span>
-            <h2 style={{ marginTop: 12 }}>Your car&apos;s next clean starts here.</h2>
-            <p>Pick a package and a time in a few taps — we&apos;ll bring the shine to you.</p>
-          </div>
-          <div className="actions">
-            <Link to="/book" className="btn btn-gold">
-              <span>
-                <CalendarCheck size={18} /> Book Online
-              </span>
-            </Link>
-            <a href={BUSINESS.phoneHref} className="btn btn-outline">
-              <span>
-                <Phone size={18} /> Call Now
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function Home() {
   useReveal([]);
   return (
@@ -588,6 +400,7 @@ export default function Home() {
       <Gallery />
       <Why />
       <Area />
+      <Reviews />
       <Faq />
       <Cta />
     </>

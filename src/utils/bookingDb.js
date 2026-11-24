@@ -1,10 +1,9 @@
-// Booking data layer.
-// Primary store: Cloudflare Worker + D1 (VITE_API_URL).
-// Fallback / double-booking guard: localStorage on this device.
+// Booking data layer: the Cloudflare Worker (worker/worker.js) + the shared D1 database.
+// The Worker prices every booking from the selected service ids and checks card payments
+// with Stripe, so nothing the browser sends about price or payment is trusted.
 
-import { SOURCE, ID_PREFIX } from '../data/site';
+import { EXTERIOR, PACKAGES } from '../data/site';
 
-const LS_KEY = 'bonnie_bookings_v1';
 const PENDING_KEY = 'bonnie_pending_booking';
 const LAST_KEY = 'bonnie_last_booking';
 
@@ -13,77 +12,92 @@ export const API_URL =
   rawApi.startsWith('https://') && !/YOUR-|your-subdomain/i.test(rawApi) ? rawApi : '';
 export const apiConfigured = Boolean(API_URL);
 
-function readLocal() {
+async function request(path, options = {}) {
+  let res;
   try {
-    return JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    });
+  } catch {
+    throw new Error('Could not reach the booking server. Check your connection and try again.');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Something went wrong. Please try again.');
+    err.status = res.status;
+    err.code = res.status === 409 ? 'SLOT_TAKEN' : data.code;
+    throw err;
+  }
+  return data;
+}
+
+/** Service ids for the Worker: one package, plus 'exterior' when the add-on is chosen. */
+export const serviceIds = (pending) => [pending.packageId, ...(pending.exterior ? [EXTERIOR.id] : [])];
+
+export function serviceLabel(pending) {
+  const pkg = PACKAGES.find((p) => p.id === pending.packageId);
+  return `${pkg?.name || 'Detail'}${pending.exterior ? ` + ${EXTERIOR.name}` : ''}`;
+}
+
+/** Start times already booked on a date. */
+export async function getBookedTimes(dateKey) {
+  if (!apiConfigured) return [];
+  try {
+    const data = await request(`/api/availability?start=${encodeURIComponent(dateKey)}&end=${encodeURIComponent(dateKey)}`);
+    return data.booked?.[dateKey] || [];
   } catch {
     return [];
   }
 }
-function writeLocal(list) {
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(list.slice(-200)));
-  } catch {
-    /* storage unavailable */
-  }
+
+/** -> { clientSecret, paymentIntentId, amount } priced by the Worker. */
+export function createPaymentIntent(pending, coupon) {
+  return request('/api/create-payment-intent', {
+    method: 'POST',
+    body: JSON.stringify({
+      services: serviceIds(pending),
+      coupon: coupon || '',
+      date: pending.date,
+      time: pending.time,
+      name: pending.info.name,
+      email: pending.info.email,
+    }),
+  });
 }
 
-export function makeBookingId() {
-  const t = Date.now().toString(36).toUpperCase().slice(-5);
-  const r = Math.random().toString(36).toUpperCase().slice(2, 6);
-  return `${ID_PREFIX}${t}${r}`;
-}
-
-/** Times already taken on a date (API + this device). */
-export async function getBookedTimes(dateKey) {
-  const local = readLocal()
-    .filter((b) => b.date === dateKey && b.status !== 'cancelled')
-    .map((b) => b.time);
-  if (!apiConfigured) return [...new Set(local)];
-  try {
-    const res = await fetch(`${API_URL}/api/availability?date=${encodeURIComponent(dateKey)}`);
-    if (!res.ok) throw new Error('availability failed');
-    const data = await res.json();
-    return [...new Set([...(data.booked || []), ...local])];
-  } catch {
-    return [...new Set(local)];
-  }
-}
-
-/** Save a booking. Returns { id, conflict }. */
-export async function createBooking(booking) {
-  const payload = {
-    id: booking.id || makeBookingId(),
-    source: SOURCE,
-    status: 'confirmed',
-    ...booking,
+/**
+ * Save the booking. Pay later: { payLater: true }. Card: { paymentIntentId } — the Worker
+ * re-reads that PaymentIntent from Stripe before saving the booking as Paid.
+ * Returns { id, booking } with the Worker's booking id, payment status and total.
+ */
+export async function createBooking(pending, { payLater = false, paymentIntentId } = {}) {
+  const data = await request('/api/bookings', {
+    method: 'POST',
+    body: JSON.stringify({
+      services: serviceIds(pending),
+      date: pending.date,
+      time: pending.time,
+      ...pending.info,
+      payLater,
+      paymentIntentId,
+    }),
+  });
+  const booking = {
+    id: data.id,
+    date: pending.date,
+    time: pending.time,
+    service: serviceLabel(pending),
+    ...pending.info,
+    payment_status: data.payment_status,
+    total: data.total,
   };
-
-  let conflict = false;
-  if (apiConfigured) {
-    const res = await fetch(`${API_URL}/api/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.status === 409) {
-      const err = new Error(data.error || 'That time was just booked. Please pick another slot.');
-      err.code = 'SLOT_TAKEN';
-      throw err;
-    }
-    if (!res.ok) throw new Error(data.error || 'Could not save your booking.');
-    payload.id = data.id || payload.id;
-    conflict = Boolean(data.conflict);
-  }
-
-  writeLocal([...readLocal(), payload]);
   try {
-    sessionStorage.setItem(LAST_KEY, JSON.stringify(payload));
+    sessionStorage.setItem(LAST_KEY, JSON.stringify(booking));
   } catch {
     /* ignore */
   }
-  return { id: payload.id, conflict, booking: payload };
+  return { id: data.id, booking };
 }
 
 export function savePending(data) {

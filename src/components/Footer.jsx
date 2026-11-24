@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Phone, MapPin, Clock, CalendarCheck } from 'lucide-react';
-import { BUSINESS, PACKAGES, EXTERIOR } from '../data/site';
+import { BUSINESS, REVIEWS } from '../data/site';
+import { SERVICE_PAGES, CITY_PAGES, HOME_CITY } from '../lib/pages';
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -11,25 +12,32 @@ export default function Footer() {
           <img src="/images/logo-sm.webp" alt={BUSINESS.fullName} width="360" height="264" loading="lazy" />
           <p>
             Mobile car detailing in {BUSINESS.city}, {BUSINESS.region}. We roll up to your driveway, your
-            office or your curb — you get your day back and a car that looks it.
+            office or your curb with our own water and power.
           </p>
         </div>
 
         <div>
           <h4>Services</h4>
           <ul>
-            {PACKAGES.map((p) => (
-              <li key={p.id}>
-                <Link to={`/book?service=${p.id}`}>
-                  {p.name} — ${p.price}
-                </Link>
+            {SERVICE_PAGES.map((p) => (
+              <li key={p.path}>
+                <Link to={p.path}>{p.nav}</Link>
               </li>
             ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4>Areas</h4>
+          <ul>
             <li>
-              <Link to="/book">
-                {EXTERIOR.name} — +${EXTERIOR.price}
-              </Link>
+              <Link to="/">{HOME_CITY}</Link>
             </li>
+            {CITY_PAGES.map((p) => (
+              <li key={p.path}>
+                <Link to={p.path}>{p.city}</Link>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -45,6 +53,11 @@ export default function Footer() {
             <li>
               <Link to="/#area">Service Area</Link>
             </li>
+            {REVIEWS.length > 0 && (
+              <li>
+                <Link to="/#reviews">Reviews</Link>
+              </li>
+            )}
             <li>
               <Link to="/#faq">FAQ</Link>
             </li>

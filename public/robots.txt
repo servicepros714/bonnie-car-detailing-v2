@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bonniecardetailingbuenapark.site/sitemap.xml
