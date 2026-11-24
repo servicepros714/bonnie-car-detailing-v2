@@ -34,29 +34,37 @@ const appearance = {
 };
 
 /* ─── Stripe form (inside <Elements>) ─── */
-function PayForm({ clientSecret, total, onPaid, disabled }) {
+function PayForm({ total, onPaid, disabled }) {
   const stripe = useStripe();
   const elements = useElements();
   const [busy, setBusy] = useState(false);
   const [expressVisible, setExpressVisible] = useState(true);
 
+  // <Elements> was created with this PaymentIntent's clientSecret, so confirmPayment takes only
+  // `elements` (passing clientSecret again makes Stripe.js throw before it checks the card).
+  // Anything thrown is shown to the customer instead of failing silently.
   async function confirm() {
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      clientSecret,
-      confirmParams: { return_url: `${window.location.origin}/confirmation` },
-      redirect: 'if_required',
-    });
-    if (error) {
-      toast.error(error.message || 'Payment failed. Please try another method.');
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: `${window.location.origin}/confirmation` },
+        redirect: 'if_required',
+      });
+      if (error) {
+        toast.error(error.message || 'Payment failed. Please try another method.');
+        return false;
+      }
+      if (paymentIntent && ['succeeded', 'processing'].includes(paymentIntent.status)) {
+        await onPaid(paymentIntent.id);
+        return true;
+      }
+      toast.error('Payment was not completed.');
+      return false;
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.message || 'Payment could not start. Please try again or choose “I’ll pay later”.');
       return false;
     }
-    if (paymentIntent && ['succeeded', 'processing', 'requires_capture'].includes(paymentIntent.status)) {
-      await onPaid(paymentIntent.id);
-      return true;
-    }
-    toast.error('Payment was not completed.');
-    return false;
   }
 
   async function handleSubmit(e) {
@@ -281,7 +289,6 @@ export default function Checkout() {
           ) : clientSecret ? (
             <Elements stripe={stripePromise} options={{ clientSecret, appearance }} key={clientSecret}>
               <PayForm
-                clientSecret={clientSecret}
                 total={total}
                 disabled={saving}
                 onPaid={(paymentIntentId) => finalize(paymentIntentId)}
