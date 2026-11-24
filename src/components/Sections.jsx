@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, CalendarCheck, Check, Plus, ArrowRight, MapPin, Star, Quote } from 'lucide-react';
-import { BUSINESS, PACKAGES, EXTERIOR, FAQS, REVIEWS } from '../data/site';
+import { BUSINESS, PACKAGES, EXTERIOR, FAQS, REVIEWS, GOOGLE_RATING, GOOGLE_PROFILE_URL } from '../data/site';
 import { SERVICE_PAGES, CITY_PAGES, HOME_CITY } from '../lib/pages';
 
 // Sections shared by the home page and the SEO landing pages.
@@ -152,6 +152,15 @@ export function Reviews() {
           <h2 className="section-title">
             What customers <span className="gold">say</span>
           </h2>
+          {GOOGLE_RATING && (
+            <p className="section-lead rev-rating">
+              Rated {GOOGLE_RATING.value} out of 5 from {GOOGLE_RATING.count} reviews on{' '}
+              <a href={GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+                Google
+              </a>
+              .
+            </p>
+          )}
         </div>
         <div className="rev-grid">
           {REVIEWS.map((r, i) => (

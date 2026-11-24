@@ -303,3 +303,12 @@ a.chip.home:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* Reviews: rating line with a link to the Google profile */
+.rev-rating {
+  margin-top: 12px;
+}
+.rev-rating a {
+  color: var(--gold);
+  font-weight: 600;
+}
