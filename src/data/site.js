@@ -115,13 +115,12 @@ export const GALLERY = [
 // Real Google reviews only, as { name: 'First L.', text: '...' } (first name + last initial,
 // typos fixed; leave out reviews that read like a shop visit). The section and its menu
 // link stay hidden while this is empty.
-// From the Google profile, Nov 2026 (all 5 stars). Alma D.'s review is cut where Google truncates it;
-// reviews not visible in the screenshots are not included.
+// From the Google profile, Nov 2026 (all 5 stars). Reviews not visible in the screenshots are not
+// included. Alma D. was dropped at the owner's request (same reviewer appears on Bright Coat's profile).
 export const REVIEWS = [
   { name: 'Stephanie F.', text: 'I could not be happier! Bonnie Car Detailing did an amazing job on my car! They were professional, thorough, and paid attention to every detail. My car looked and smelled like new when they were finished. Great customer service, and fair pricing. I highly recommend Bonnie Car Detailing to anyone looking for quality work!' },
   { name: 'Anthony R.', text: "Absolutely impressed! Bonnie Car Detailing made my car look better than I thought was possible. Every detail was taken care of, and the customer service was excellent. I'll definitely be using them again and recommending them to friends and family." },
   { name: 'Gretchen M.', text: "Guys did a great job. I was super impressed, and I'm paranoid about who I let detail my car too. It looked like when I bought it after they were done, and it didn't take all day either. Super efficient, I would recommend them to anyone!" },
-  { name: 'Alma D.', text: 'Really impressed with the overall service and how everything turned out. The truck looks fantastic, with a beautiful shine and a clean, polished finish. The attention to detail was great.' },
   { name: 'Arnold S.', text: 'Super impressed with the results! The team is very professional and their attention to detail is amazing. They got into every inch of the interior. I highly recommend!' },
   { name: 'Jaime R.', text: 'They did an excellent job. I felt like I was driving off the dealer lot again.' },
   { name: 'Kiki M.', text: 'My car came out looking so legit, I love it!!! Thank you so much!!' },
