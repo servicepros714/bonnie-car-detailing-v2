@@ -241,11 +241,27 @@ p {
   opacity: 1;
   transform: none;
 }
+/* Above-the-fold hero: slides in but is never hidden, so it paints right away (keeps LCP fast). */
+.hero-in {
+  animation: heroIn 0.8s var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes heroIn {
+  from {
+    transform: translateY(22px);
+  }
+  to {
+    transform: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .hero-in {
+    animation: none;
   }
   html {
     scroll-behavior: auto;

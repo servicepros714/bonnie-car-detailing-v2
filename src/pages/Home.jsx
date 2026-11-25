@@ -65,19 +65,19 @@ function Hero() {
       <Bubbles />
       <div className="container hero-inner">
         <div>
-          <h1 className="hero-kicker reveal">
+          <h1 className="hero-kicker hero-in">
             <b>Mobile</b> car detailing in {BUSINESS.city}, {BUSINESS.region}
           </h1>
-          <p className="hero-title reveal" style={{ '--d': '80ms' }}>
+          <p className="hero-title hero-in" style={{ '--d': '80ms' }}>
             <span className="chrome">We bring the</span> <span className="shine">shine</span>
             <br />
             <span className="chrome">to your driveway.</span>
           </p>
-          <p className="hero-sub reveal" style={{ '--d': '160ms' }}>
+          <p className="hero-sub hero-in" style={{ '--d': '160ms' }}>
             Deep interior details and an optional hand-washed exterior, done right where your car is parked,
             with our own water and power. Pick a package, pick a time and we handle the rest.
           </p>
-          <div className="hero-ctas reveal" style={{ '--d': '240ms' }}>
+          <div className="hero-ctas hero-in" style={{ '--d': '240ms' }}>
             <Link to="/book" className="btn btn-gold">
               <span>
                 <CalendarCheck size={18} /> Book Online
@@ -89,7 +89,7 @@ function Hero() {
               </span>
             </a>
           </div>
-          <div className="hero-trust reveal" style={{ '--d': '320ms' }}>
+          <div className="hero-trust hero-in" style={{ '--d': '320ms' }}>
             <span>
               <Truck size={16} /> Fully mobile
             </span>
@@ -105,12 +105,15 @@ function Hero() {
           </div>
         </div>
 
-        <div className="hero-visual reveal" style={{ '--d': '120ms' }}>
+        <div className="hero-visual hero-in" style={{ '--d': '120ms' }}>
           <div className="hex hero-hex-outline" />
           <div className="hex hero-hex-photo">
             <img
-              src="/images/audi-foam.jpg"
+              src="/images/audi-foam.webp"
               alt="Sedan covered in snow foam during a Bonnie Car Detailing wash"
+              width="720"
+              height="892"
+              decoding="async"
             />
           </div>
           <div className="hero-badge">
