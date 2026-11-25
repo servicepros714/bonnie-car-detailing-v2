@@ -66,7 +66,7 @@ function Hero() {
       <div className="container hero-inner">
         <div>
           <h1 className="hero-kicker reveal">
-            <b>Mobile</b> Car detailing in {BUSINESS.city}, {BUSINESS.region}
+            <b>Mobile</b> car detailing in {BUSINESS.city}, {BUSINESS.region}
           </h1>
           <p className="hero-title reveal" style={{ '--d': '80ms' }}>
             <span className="chrome">We bring the</span> <span className="shine">shine</span>
